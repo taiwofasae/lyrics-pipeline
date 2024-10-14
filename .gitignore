@@ -1,0 +1,11 @@
+myenv/
+
+*.egg-info
+
+data/*
+!*.gitkeep
+
+.env
+
+*.pyc
+*/__pycache__
