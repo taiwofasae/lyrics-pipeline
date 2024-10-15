@@ -1,6 +1,8 @@
 from ingest import ingest_file, artifact, ingest_folder
 from storage import file_manager
 from storage import s3
+from source.azlyrics import azlyrics
+
 
 df, csv_list = ingest_file.main('./data/azlyrics_lyrics_n.csv')
 
@@ -19,8 +21,12 @@ path = artifact.create(df, './data/10-14-2014.csv')
 # print(ingest_file.main(path3 + '.txt')[0].tail(1))
 
 file_man = file_manager.File('./data/')
-path = file_man('10-14-2014.csv')
-df1 = artifact.load(path)
-print(df1.head(1))
+# path = file_man('10-14-2014.csv')
+# df1 = artifact.load(path)
+# print(df1.head(1))
 
-s3.upload_file('10-14-2014.csv', source_path=path)
+# s3.upload_file('10-14-2014.csv', source_path=path)
+
+taylorswift = file_man('azlyrics/taylorswift.html')
+html = azlyrics._read_html_file(taylorswift)
+

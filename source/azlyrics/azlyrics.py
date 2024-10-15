@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 import requests
 import json
+import string
 
 agent = 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) \
         Gecko/20100101 Firefox/24.0'
@@ -21,6 +22,8 @@ def _get_letter_html(letter):
     else:
         raise Exception("Unexpected Input")
 
+def indexes():
+    return [ch for ch in string.ascii_lowercase[:26]] + ['19']
 
 def artists(letter, html_content = None):
     if not html_content:
