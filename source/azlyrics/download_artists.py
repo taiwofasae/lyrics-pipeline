@@ -75,7 +75,21 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    download(args.metadatadb, args.folderpath, args.indexletter, args.filepath)
+    iteration = 0
+    while iteration < args.tries:
+        
+        try:
+            print('===========================================')
+            print(f'Starting iteration number {iteration+1}...')
+            download(args.metadatadb, args.folderpath, args.indexletter, args.filepath)
+            print(f'..done!')
+            break
+        except AssertionError as e:
+            pass
+        
+        iteration += 1
+    
+    
     
     
     
