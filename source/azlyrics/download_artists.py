@@ -5,7 +5,7 @@ import sqlite3
 from source.azlyrics import azlyrics, argparse_utils, azlyrics_helpers
 
 
-def download(metadb, folderpath, indexletter = None, filepath = None):
+def download(metadb, folderpath, indexletter = None, filepath = None, tries = 1):
     
     # save to sqlite
     con = sqlite3.connect(metadb)
@@ -28,9 +28,23 @@ def download(metadb, folderpath, indexletter = None, filepath = None):
     folderpath = args.folderpath
     
     for indexletter, filepath in zip(indexes, filepaths):
-        artists = [(azlyrics_helpers.get_artist_slug(url), url) for artist, url in azlyrics.artists(indexletter)]
         
-        assert len(artists ) > 0, "artists list is empty"
+        trie = 0
+        while trie < tries:
+            
+            try:
+                print(f'Try #{trie+1}...')
+                artists = [(azlyrics_helpers.get_artist_slug(url), url) for artist, url in azlyrics.artists(indexletter)]
+                
+                assert len(artists ) > 0, "artists list is empty"
+                break
+            except AssertionError as e:
+                print(e)
+            
+            trie += 1
+        
+        
+        
         #artists = ['tiwasavage','burnaboy','wizkid','tems','davido']
         
         for artist, url in artists:
@@ -78,19 +92,7 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    iteration = 0
-    while iteration < args.tries:
-        
-        try:
-            print('===========================================')
-            print(f'Starting iteration number {iteration+1}...')
-            download(args.metadatadb, args.folderpath, args.indexletter, args.filepath)
-            print(f'..done!')
-            break
-        except AssertionError as e:
-            print(e)
-        
-        iteration += 1
+    download(args.metadatadb, args.folderpath, args.indexletter, args.filepath, args.tries)
     
     
     

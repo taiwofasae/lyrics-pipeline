@@ -11,5 +11,5 @@ parser.add_argument(
     '--tries', '-t',
     type=int,
     default=5,
-    help='No of retries'
+    help='No of request attempts allowed'
 )
