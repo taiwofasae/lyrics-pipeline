@@ -1,0 +1,6 @@
+beautifulsoup4==4.12.3
+cryptography==42.0.7
+fake-useragent==1.5.1
+requests==2.32.3
+stem==1.8.2
+urllib3==2.2.1

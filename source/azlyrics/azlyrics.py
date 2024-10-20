@@ -1,6 +1,5 @@
-
 from bs4 import BeautifulSoup
-import requests
+import anon_requests as requests
 import json
 import string
 
@@ -9,9 +8,41 @@ agent = 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) \
 headers = {'User-Agent': agent}
 base = "https://www.azlyrics.com/"
 
+def clean_url(url_str):
+    """
+    Cleans a given URL.
+    :param url_str: String formatted URL.
+    :return: Cleaned string formatted URL.
+    """
+    url_str = url_str.lower()
+    url_str = url_str.strip()
+
+    
+
+    # strip off trailing and leading '/'
+    strips = [s.replace('//','/') for s in url_str.split('https://')]
+    # extract last stem with valid address
+    url_str = 'https://' + strips[-1]
+
+    # remove protocol and subdomain www, then return
+    url_str = url_str.split('https://')[-1]
+    url_str = url_str.split('www.')[-1]
+    url_str = 'https://www.' + url_str
+
+    return url_str
+
+
 def _get_html(url):
-    req = requests.get(url, headers=headers)
-    return req.content
+    if not url.startswith(base):
+        url = base + url
+
+    url = clean_url(url)
+
+    response = requests.get(url, headers=headers)
+    assert response.ok
+    c = response.content
+    print(f"response content length: {len(c)}")
+    return c
 
 def _get_letter_html(letter):
     if letter.isalpha() and len(letter) == 1:
@@ -63,6 +94,10 @@ def songs(artist, url = None, html_content = None):
     soup = BeautifulSoup(html_content, "html.parser")
 
     all_albums = soup.find('div', id='listAlbum')
+
+    if not all_albums:
+        return artist
+    
     first_album = all_albums.find('div', class_='album')
     album_name = first_album.b.text
     s = []
@@ -121,3 +156,11 @@ def _read_html_file(filename):
         text = f.read()
 
     return text
+
+if __name__ == '__main__':
+    j = _read_html_file('j.html')
+    swift = _read_html_file('taylorswift.html')
+    everybodylies = _read_html_file('everybodylies.html')
+    #print(artists('j',html_content=j))
+    #print(songs(artist = 'taylorswift', html_content = swift))
+    #print(lyrics(everybodylies))
