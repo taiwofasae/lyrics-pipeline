@@ -1,8 +1,8 @@
 
-from . import azlyrics
+#from source.azlyrics import azlyrics
 
 def get_artist_slug(artist_url):
-  return '/'.join(artist_url.split('/')[-2:]).split('.html')[0]
+  return '/'.join(artist_url.split('/')[-1:]).split('.html')[0]
 
 def generate_artist_slug(artist):
   artist = artist.lower().rstrip('/').lstrip('/')

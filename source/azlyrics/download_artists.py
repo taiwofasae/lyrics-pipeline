@@ -2,7 +2,7 @@ import argparse
 import os
 import download_indexes
 import sqlite3
-from source.azlyrics import azlyrics, argparse_utils
+from source.azlyrics import azlyrics, argparse_utils, azlyrics_helpers
 
 
 def download(metadb, folderpath, indexletter = None, filepath = None):
@@ -28,26 +28,29 @@ def download(metadb, folderpath, indexletter = None, filepath = None):
     folderpath = args.folderpath
     
     for indexletter, filepath in zip(indexes, filepaths):
-        artists = azlyrics.artists(indexletter)
+        artists = [(azlyrics_helpers.get_artist_slug(url), url) for artist, url in azlyrics.artists(indexletter)]
+        
+        assert len(artists ) > 0, "artists list is empty"
         #artists = ['tiwasavage','burnaboy','wizkid','tems','davido']
         
-        for artist in artists:
+        for artist, url in artists:
+            
             try:
-                cur.execute("INSERT INTO artists (slug, artist_letter, url, status) VALUES (?, ?, ?, ?)", (artist, indexletter, '', 'pending'))
+                cur.execute("INSERT INTO artists (slug, artist_letter, url, status) VALUES (?, ?, ?, ?)", (artist, indexletter, url, 'pending'))
                 con.commit()
             except Exception as e:
                 print(f"Could not insert artist {artist} into artists table of db.")
-                pass
+                print(e)
         
         # update indexes download in db
         cur.execute("SELECT count(*) FROM artists WHERE artist_letter = ? and status!='done';", (indexletter,))
         not_dones = cur.fetchone()[0]
         if not_dones == 0:
-            cur.execute("UPDATE indexes WHERE letter = ? set status = 'done';", (indexletter,))
+            cur.execute("UPDATE indexes set status = 'done' WHERE letter = ?;", (indexletter,))
             con.commit() 
         
         with open(os.path.join(folderpath, filepath), 'w') as f:
-            f.write('\n'.join(artists))
+            f.write('\n'.join([f"{artist},{url}" for artist, url in artists]))
             
     con.close()
 
@@ -85,7 +88,7 @@ if __name__ == '__main__':
             print(f'..done!')
             break
         except AssertionError as e:
-            pass
+            print(e)
         
         iteration += 1
     
