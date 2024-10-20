@@ -28,8 +28,8 @@ def download(metadb, folderpath, indexletter = None, filepath = None):
     folderpath = args.folderpath
     
     for indexletter, filepath in zip(indexes, filepaths):
-        #artists = azlyrics.artists(indexletter)
-        artists = ['tiwasavage','burnaboy','wizkid','tems','davido']
+        artists = azlyrics.artists(indexletter)
+        #artists = ['tiwasavage','burnaboy','wizkid','tems','davido']
         
         for artist in artists:
             try:

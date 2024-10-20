@@ -4,3 +4,4 @@ fake-useragent==1.5.1
 requests==2.32.3
 stem==1.8.2
 urllib3==2.2.1
+PySocks==1.7.1

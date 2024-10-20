@@ -21,7 +21,7 @@ def get(url, *args, **kwargs):
             'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language':'en-US,en;q=0.9',
             'Connection':'keep-alive',
-            'Cookie':'_ga=GA1.2.1781353; _gid=GA1.2.162452; _gat=1; _ga_F9YR6W4HNZ=GS1.2.1717',
+            'Cookie':'_ga=GA1.2.3456; _gid=GA1.2.43245; _gat=1; _ga_F9YR6W4HNZ=GS1.2.2000',
             'Sec-Ch-Ua':'"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
             'Sec-Ch-Ua-Mobile':'?0',
             'Sec-Ch-Ua-Platform':'"Windows"',

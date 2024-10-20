@@ -4,10 +4,11 @@ from storage import file_manager
 import sqlite3
 
 def main(artist_slug : str):
-    file_man = file_manager.File('../data')
-    with open(file_man('azlyrics/taylorswift.html'), 'r') as f:
-        taylorswift = f.read()
-    songs = azlyrics.songs(artist=artist_slug, html_content=taylorswift)
+    # file_man = file_manager.File('../data')
+    # with open(file_man('azlyrics/taylorswift.html'), 'r') as f:
+    #     taylorswift = f.read()
+    #songs = azlyrics.songs(artist=artist_slug, html_content=taylorswift)
+    songs = azlyrics.songs(artist=artist_slug)
     
     return songs['songs']
 

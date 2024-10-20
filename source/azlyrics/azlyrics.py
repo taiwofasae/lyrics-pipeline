@@ -27,7 +27,7 @@ def clean_url(url_str):
     # remove protocol and subdomain www, then return
     url_str = url_str.split('https://')[-1]
     url_str = url_str.split('www.')[-1]
-    url_str = 'https://www.' + url_str
+    url_str = 'https://' + url_str
 
     return url_str
 
