@@ -13,3 +13,10 @@ parser.add_argument(
     default=5,
     help='No of request attempts allowed'
 )
+
+parser.add_argument(
+    '--tags',
+    type=str,
+    default="",
+    help='Extra comments or tags'
+)

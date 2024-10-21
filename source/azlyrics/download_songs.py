@@ -1,6 +1,5 @@
 from source.azlyrics import azlyrics, argparse_utils
 import os
-from storage import file_manager
 import sqlite3
 
 def main(artist_slug : str):
@@ -19,10 +18,14 @@ def download(metadb, artist, filepath):
     cur.execute("CREATE TABLE IF NOT EXISTS songs (title, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
     
     # fetch pending artists
+    cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
+    artists = [x[0] for x in cur.fetchall()]  
     
     # or force fetch all artists
+    
         
-    songs = main(artist_slug=artist)
+    songs = azlyrics.songs(artist=artist)['songs']
+    assert len(songs) > 0, "songs list is empty"
     
     for title, url in songs:
         try:
@@ -30,15 +33,15 @@ def download(metadb, artist, filepath):
             con.commit()
 
         except Exception as e:
-            #print(f"Could not insert song {song} into songs table of db.")
-            pass
+            print(f"Could not insert song {title} into songs table of db.")
     
     # update artist download in db
     cur.execute("SELECT count(*) FROM songs WHERE artist = ? and status!='done';", (artist,))
     not_dones = cur.fetchone()[0]
     if not_dones == 0:
-        cur.execute("UPDATE artists WHERE slug = ? set status = 'done';", (artist))
+        cur.execute("UPDATE artists set status = 'done' WHERE slug = ? ;", (artist))
         con.commit()
+    
             
     with open(filepath, 'w') as f:
         f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
@@ -67,9 +70,9 @@ if __name__ == '__main__':
     while iteration < args.tries:
         
         try:
-            print('===========================================')
-            print(f'Starting iteration number {iteration+1}...')
-            download(args.metadatadb, args.artist, args.filepath, args.tries)
+            print(f'{args.tags}')
+            print(f'Trying... #{iteration+1}...')
+            download(args.metadatadb, args.artist, args.filepath)
             print(f'..done!')
             break
         except AssertionError as e:
