@@ -1,6 +1,7 @@
 from source.azlyrics import azlyrics, argparse_utils
 import os
 import sqlite3
+from requests.exceptions import TooManyRedirects
 
 def main(artist_slug : str):
     # file_man = file_manager.File('../data')
@@ -77,6 +78,8 @@ if __name__ == '__main__':
             break
         except AssertionError as e:
             print(e)
+        except TooManyRedirects as e:
+            print("Too many redirects occurred.")
         
         iteration += 1
     
