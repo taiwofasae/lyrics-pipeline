@@ -27,7 +27,7 @@ def clean_url(url_str):
     # remove protocol and subdomain www, then return
     url_str = url_str.split('https://')[-1]
     url_str = url_str.split('www.')[-1]
-    url_str = 'https://' + url_str
+    url_str = 'https://www.' + url_str
 
     return url_str
 
@@ -45,7 +45,7 @@ def _get_html(url):
     return c
 
 def _get_letter_html(letter):
-    if letter.isalpha() and len(letter) == 1:
+    if (letter.isalpha() and len(letter) == 1) or (letter == '19'):
         letter = letter.lower()
         url = base + letter + ".html"
 
