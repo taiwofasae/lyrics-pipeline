@@ -2,6 +2,14 @@ from requests import TooManyRedirects
 from source.azlyrics import azlyrics, argparse_utils
 import sqlite3
 
+def update_songs_db(metadb, artist, song):
+    # update song download in db
+    con = sqlite3.connect(metadb)
+    cur = con.cursor()
+    cur.execute("UPDATE songs set status = 'done' WHERE slug = ? and artist = ? ;", (song, artist))
+    
+    con.close()
+
 def download(metadb, artist, song, filepath):
     
     lyrics = azlyrics.lyrics(artist=artist, song=song)
@@ -12,12 +20,8 @@ def download(metadb, artist, song, filepath):
     with open(filepath, 'w') as f:
         f.write(lyrics)
     
-    # update song download in db
-    con = sqlite3.connect(metadb)
-    cur = con.cursor()
-    cur.execute("UPDATE songs set status = 'done' WHERE slug = ? and artist = ? ;", (song, artist))
+    update_songs_db(metadb, artist, song)
     
-    con.close()
     
 if __name__ == '__main__':
     parser = argparse_utils.parser
@@ -56,6 +60,10 @@ if __name__ == '__main__':
             print(e)
         except TooManyRedirects as e:
             print("Too many redirects occurred.")
+        except sqlite3.OperationalError:
+            print(e)
+            print("Trying sqlite update again ....")
+            update_songs_db(args.metadatadb, args.artist, args.song)
         
         iteration += 1
     

@@ -3,6 +3,20 @@ import os
 import sqlite3
 from requests.exceptions import TooManyRedirects
 
+class DB:
+    def create_table_if_not_exist(db_con):
+        cur = db_con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
+        
+    def update_artists_table_on_complete(db_con, artist):
+        cur = db_con.cursor()
+        # update artist download in db
+        cur.execute("SELECT count(*) FROM songs WHERE artist = ? and status!='done';", (artist,))
+        not_dones = cur.fetchone()[0]
+        if not_dones == 0:
+            cur.execute("UPDATE artists set status = 'done' WHERE slug = ? ;", (artist))
+            db_con.commit()
+
 def main(artist_slug : str):
     # file_man = file_manager.File('../data')
     # with open(file_man('azlyrics/taylorswift.html'), 'r') as f:
@@ -12,11 +26,7 @@ def main(artist_slug : str):
     
     return songs['songs']
 
-def download(db_connection, artist, filepath):
-    # save to sqlite
-    con = db_connection
-    cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
+def download(db_con, artist, filepath):
     
     # fetch pending artists
     #cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
@@ -28,28 +38,25 @@ def download(db_connection, artist, filepath):
     songs = azlyrics.songs(artist=artist)['songs']
     assert len(songs) > 0, "songs list is empty"
     
+    cur = db_con.cursor()
     for title, url in songs:
         slug = url.split("/")[-1]
         slug = slug.split('.html')[0]
         try:
             cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
-            con.commit()
+            db_con.commit()
 
         except Exception as e:
             print(f"Could not insert song {title} into songs table of db.")
     
-    # update artist download in db
-    cur.execute("SELECT count(*) FROM songs WHERE artist = ? and status!='done';", (artist,))
-    not_dones = cur.fetchone()[0]
-    if not_dones == 0:
-        cur.execute("UPDATE artists set status = 'done' WHERE slug = ? ;", (artist))
-        con.commit()
+    DB.update_artists_table_on_complete(db_con, artist)
     
+    db_con.close()
             
     with open(filepath, 'w') as f:
         f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
         
-    con.close()
+    
     
 if __name__ == '__main__':
         
@@ -69,10 +76,12 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
+    db_con = sqlite3.connect(args.metadatadb)
+    DB.create_table_if_not_exist(db_con)
+    
     iteration = 0
     while iteration < args.tries:
         
-        db_con = sqlite3.connect(args.metadatadb)
         try:
             print(f'{args.tags}')
             print(f'Trying... #{iteration+1}...')
