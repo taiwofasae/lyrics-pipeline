@@ -7,6 +7,7 @@ class DB:
     def create_table_if_not_exist(db_con):
         cur = db_con.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
+        db_con.commit()
         
     def update_artists_table_on_complete(db_con, artist):
         cur = db_con.cursor()
@@ -26,7 +27,7 @@ def main(artist_slug : str):
     
     return songs['songs']
 
-def download(db_con, artist, filepath):
+def download(metadb, artist, filepath):
     
     # fetch pending artists
     #cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
@@ -38,21 +39,21 @@ def download(db_con, artist, filepath):
     songs = azlyrics.songs(artist=artist)['songs']
     assert len(songs) > 0, "songs list is empty"
     
-    cur = db_con.cursor()
-    for title, url in songs:
-        slug = url.split("/")[-1]
-        slug = slug.split('.html')[0]
-        try:
-            cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
-            db_con.commit()
+    with sqlite3.connect(metadb) as db_con:
+        cur = db_con.cursor()
+        for title, url in songs:
+            url = url or ''
+            slug = url.split("/")[-1]
+            slug = slug.split('.html')[0]
+            try:
+                cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
+                db_con.commit()
 
-        except Exception as e:
-            print(f"Could not insert song {title} into songs table of db.")
+            except Exception as e:
+                print(f"Could not insert song {title} into songs table of db.")
+        
+        DB.update_artists_table_on_complete(db_con, artist)
     
-    DB.update_artists_table_on_complete(db_con, artist)
-    
-    db_con.close()
-            
     with open(filepath, 'w') as f:
         f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
         
@@ -76,8 +77,8 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    db_con = sqlite3.connect(args.metadatadb)
-    DB.create_table_if_not_exist(db_con)
+    with sqlite3.connect(args.metadatadb) as db_con:
+        DB.create_table_if_not_exist(db_con)
     
     iteration = 0
     while iteration < args.tries:
@@ -86,17 +87,17 @@ if __name__ == '__main__':
             print(f'{args.tags}')
             print(f'Trying... #{iteration+1}...')
             
-            download(db_con, args.artist, args.filepath)
+            download(args.metadatadb, args.artist, args.filepath)
             print(f'..done!')
             break
         except AssertionError as e:
             print(e)
         except TooManyRedirects as e:
             print("Too many redirects occurred.")
-        finally:
-            db_con.close()
         
         iteration += 1
+        
+    
     
     
     

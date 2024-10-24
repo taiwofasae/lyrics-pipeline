@@ -60,7 +60,7 @@ if __name__ == '__main__':
             print(e)
         except TooManyRedirects as e:
             print("Too many redirects occurred.")
-        except sqlite3.OperationalError:
+        except sqlite3.OperationalError as e:
             print(e)
             print("Trying sqlite update again ....")
             update_songs_db(args.metadatadb, args.artist, args.song)
