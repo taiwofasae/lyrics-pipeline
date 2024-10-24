@@ -2,6 +2,7 @@ from source.azlyrics import azlyrics, argparse_utils
 import os
 import sqlite3
 from requests.exceptions import TooManyRedirects
+import contextlib
 
 class DB:
     def create_table_if_not_exist(db_con):
@@ -39,7 +40,7 @@ def download(metadb, artist, filepath):
     songs = azlyrics.songs(artist=artist)['songs']
     assert len(songs) > 0, "songs list is empty"
     
-    with sqlite3.connect(metadb) as db_con:
+    with contextlib.closing(sqlite3.connect(metadb)) as db_con:
         cur = db_con.cursor()
         for title, url in songs:
             url = url or ''
@@ -53,6 +54,7 @@ def download(metadb, artist, filepath):
                 print(f"Could not insert song {title} into songs table of db.")
         
         DB.update_artists_table_on_complete(db_con, artist)
+    
     
     with open(filepath, 'w') as f:
         f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
@@ -77,7 +79,7 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    with sqlite3.connect(args.metadatadb) as db_con:
+    with contextlib.closing(sqlite3.connect(args.metadatadb)) as db_con:
         DB.create_table_if_not_exist(db_con)
     
     iteration = 0
