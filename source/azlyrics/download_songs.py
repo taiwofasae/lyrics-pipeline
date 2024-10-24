@@ -19,8 +19,8 @@ def download(db_connection, artist, filepath):
     cur.execute("CREATE TABLE IF NOT EXISTS songs (title, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
     
     # fetch pending artists
-    cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
-    artists = [x[0] for x in cur.fetchall()]  
+    #cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
+    #artists = [x[0] for x in cur.fetchall()]  
     
     # or force fetch all artists
     

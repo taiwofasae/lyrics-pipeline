@@ -1,0 +1,1 @@
+- Retrieve artist songs not stratified into albums. Beautifulsoup on 'listalbum-item' classes instead of 'listAlbum' id divs.
