@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-# from source.azlyrics import anon_requests as requests
+from source.azlyrics import anon_requests as requests
 import json
 import string
 
@@ -93,13 +93,13 @@ def songs(artist, url = None, html_content = None):
 
     soup = BeautifulSoup(html_content, "html.parser")
 
-    all_albums = soup.findAll('div', class_='listalbum-item')
+    all_albums = soup.find('div', id='listAlbum')
 
-    print(f"{len(all_albums)} albums found")
     if not all_albums:
         return artist
     
     first_album = all_albums.find('div', class_='album')
+    print(f"{len(all_albums.findAll('div', class_='album'))} albums found")
     album_name = first_album.b.text
     s = []
 
