@@ -7,7 +7,7 @@ def update_songs_db(metadb, artist, song):
     con = sqlite3.connect(metadb)
     cur = con.cursor()
     cur.execute("UPDATE songs set status = 'done' WHERE slug = ? and artist = ? ;", (song, artist))
-    
+    con.commit()
     con.close()
 
 def download(metadb, artist, song, filepath):
