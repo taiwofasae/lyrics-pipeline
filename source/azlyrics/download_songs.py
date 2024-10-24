@@ -16,7 +16,7 @@ def download(db_connection, artist, filepath):
     # save to sqlite
     con = db_connection
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS songs (title, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
+    cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
     
     # fetch pending artists
     #cur.execute("SELECT slug FROM artists WHERE status!='done' limit 200;")
@@ -29,8 +29,10 @@ def download(db_connection, artist, filepath):
     assert len(songs) > 0, "songs list is empty"
     
     for title, url in songs:
+        slug = url.split("/")[-1]
+        slug = slug.split('.html')[0]
         try:
-            cur.execute("INSERT INTO songs (title, artist, url, status) VALUES (?, ?, ?, ?)", (title, artist, url, 'pending'))
+            cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
             con.commit()
 
         except Exception as e:

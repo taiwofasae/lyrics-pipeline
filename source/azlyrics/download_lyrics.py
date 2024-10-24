@@ -15,7 +15,7 @@ def download(metadb, artist, song, filepath):
     # update song download in db
     con = sqlite3.connect(metadb)
     cur = con.cursor()
-    cur.execute("UPDATE songs WHERE song = ? and artist = ? set status = 'done';", (song, artist))
+    cur.execute("UPDATE songs set status = 'done' WHERE slug = ? and artist = ? ;", (song, artist))
     
     con.close()
     
