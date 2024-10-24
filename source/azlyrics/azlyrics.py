@@ -142,10 +142,10 @@ def lyrics(artist, song):
     artist = artist.lower().replace(" ", "")
     song = song.lower().replace(" ", "")
 
-    return lyrics(_get_html_lyrics(artist, song))
+    return lyrics_from_html(_get_html_lyrics(artist, song))
 
 
-def lyrics(html_content):
+def lyrics_from_html(html_content):
 
     soup = BeautifulSoup(html_content, "html.parser")
     l = soup.find_all("div", attrs={"class": None, "id": None})
