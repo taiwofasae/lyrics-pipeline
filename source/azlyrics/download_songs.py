@@ -12,9 +12,9 @@ def main(artist_slug : str):
     
     return songs['songs']
 
-def download(metadb, artist, filepath):
+def download(db_connection, artist, filepath):
     # save to sqlite
-    con = sqlite3.connect(metadb)
+    con = db_connection
     cur = con.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS songs (title, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
     
@@ -70,16 +70,20 @@ if __name__ == '__main__':
     iteration = 0
     while iteration < args.tries:
         
+        db_con = sqlite3.connect(args.metadatadb)
         try:
             print(f'{args.tags}')
             print(f'Trying... #{iteration+1}...')
-            download(args.metadatadb, args.artist, args.filepath)
+            
+            download(db_con, args.artist, args.filepath)
             print(f'..done!')
             break
         except AssertionError as e:
             print(e)
         except TooManyRedirects as e:
             print("Too many redirects occurred.")
+        finally:
+            db_con.close()
         
         iteration += 1
     
