@@ -18,18 +18,25 @@ while read -r artist_path; do
 	artist_slug=$(echo "$artist_path" | sed -r 's/.*\/(.+).txt/\1/')
 	SKIP_A=$(( $SKIP_A + 1 ))
 	output_file="$4$artist_slug.csv"
-	if [[ ! -e $output_file ]]; then
-		touch $output_file
-		cat headers.txt  > $output_file
-	fi
+	temp_output_file="${output_file%.*}.temp.csv"
+	touch $temp_output_file
+
+	cat headers.txt  > $output_file
+	
 	while IFS='|' read -r song url; do
 		SKIP_B=$(( $SKIP_B + 1 ))
+		if [[ "$url" == 'None' ]]; then
+			echo "'None' url found in text. Skipping..."
+			continue
+		fi
 		slug=$(echo "$url" | sed -r 's/.*\/(.+).html/\1/')
 		echo "artist#$SKIP_A: $artist_slug | song#$SKIP_B:  $slug : $url"
-		python ../../source/azlyrics/download_lyrics.py -m './meta.db' --artist "$artist_slug" --song "$slug" --filepath "${output_file%.*}.temp.csv" -t 100 --tags "artist#$SKIP_A: $artist_slug | song#$SKIP_B : $slug : $url"
+		python ../../source/azlyrics/download_lyrics.py -m './meta.db' --artist "$artist_slug" --song "$slug" --filepath "$temp_output_file" -t 100 --tags "artist#$SKIP_A: $artist_slug | song#$SKIP_B : $slug : $url"
 
-		echo "\"$artist_slug\",\"\",\"$song\",\"$url\","+$(cat "${output_file%.*}.temp.csv") + "\"" >> $output_file
-		break	
+		echo "\"$artist_slug\",\"\",\"$song\",\"$url\",\"" >> $output_file
+		cat "$temp_output_file" >> $output_file
+		echo "\"" >> $output_file
+	
 	done < <(tail -n "+$3" "$artist_path")
-	break
+	rm "$temp_output_file"
 done < <(ls $1*txt | tail -n "+$2")
