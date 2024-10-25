@@ -11,6 +11,9 @@ def update_songs_db(metadb, artist, song):
     con.close()
 
 def download(metadb, artist, song, filepath):
+    song = song.strip() if song else ''
+    if not song:
+        raise ValueError(f"Song value is empty: '{song}'")
     
     lyrics = azlyrics.lyrics(artist=artist, song=song)
     lyrics = lyrics[0] if lyrics else ''
