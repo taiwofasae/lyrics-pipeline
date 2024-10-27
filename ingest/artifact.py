@@ -3,6 +3,8 @@ import pandas as pd
 import csv
 import os
 
+from source import lyrics_helpers
+
 
 class ArtifactType(Enum):
     sqlite = 1
@@ -17,7 +19,8 @@ def create(artifact : pd.DataFrame, storage_path : str):
 
 def load(storage_path : str, type = 'csv') -> pd.DataFrame:
     
-    return pd.read_csv(storage_path, index_col=0)
+    csv_list = lyrics_helpers.read_csv_max_split(filepath=storage_path)
+    return pd.DataFrame(csv_list[1:], columns=csv_list[0])
 
 def append(destination : str, artifact : pd.DataFrame):
     

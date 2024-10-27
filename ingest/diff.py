@@ -8,7 +8,7 @@ def diff(df1, df2, df1_label='left_only', df2_label='right_only'):
     df2['duplicate_counter'] = df2.groupby(list(df2.columns)).cumcount()
     merged = df1.merge(df2, indicator=True, how='outer')
     
-    merged.rename(columns={'left_only': df1_label,
+    merged['_merge'] = merged['_merge'].map({'left_only': df1_label,
                                'right_only': df2_label})
     return merged[merged['_merge'] != 'both']
     
