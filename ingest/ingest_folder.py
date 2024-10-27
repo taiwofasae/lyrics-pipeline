@@ -1,3 +1,5 @@
+import argparse
+import csv
 import os
 import pandas as pd
 
@@ -28,3 +30,36 @@ def main(folder_path : str, actifact_dest_path : str = None):
         
                 
     return total_df
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument(
+        '--folder','-f',
+        type=str,
+        required=True,
+        help='Input folder')
+    
+    parser.add_argument(
+        '--outputcsv','-o',
+        type=str,
+        required=False,
+        help='Output csv file')
+    
+    parser.add_argument(
+        '--sqlite','-db',
+        type=str,
+        required=False,
+        help='Output sqlite file')
+    
+    args= parser.parse_args()
+    
+    df = main(args.folder, actifact_dest_path=args.outputcsv)
+    print(f"{len(df.index)} rows in total.")
+    
+    if args.outputcsv:
+        df.to_csv(args.outputcsv, index=False, quoting=csv.QUOTE_NONNUMERIC)
+        
+    if args.sqlite:
+        ingest_file.save_to_db(args.sqlite, df)
+    

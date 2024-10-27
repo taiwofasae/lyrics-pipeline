@@ -15,7 +15,7 @@ def create(artifact : pd.DataFrame, storage_path : str):
     
     return storage_path
 
-def load(storage_path : str) -> pd.DataFrame:
+def load(storage_path : str, type = 'csv') -> pd.DataFrame:
     
     return pd.read_csv(storage_path, index_col=0)
 
