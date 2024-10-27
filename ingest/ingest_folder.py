@@ -5,13 +5,17 @@ import pandas as pd
 
 from ingest import artifact, ingest_file
 
-def main(folder_path : str, actifact_dest_path : str = None):
+def main(folder_path : str, actifact_dest_path : str = None, extension_filter = ''):
     
     total_df = None
     for root,dirs,files in os.walk(folder_path):
         for file in files:
             
             local_path = os.path.join(root, file).replace("\\","/")
+            
+            # filter for extension
+            if not local_path.endswith(tuple(extension_filter.replace(';',',').split(','))):
+                continue
 
             try:
                 df, csv_list = ingest_file.main(local_path)
@@ -41,6 +45,12 @@ if __name__ == '__main__':
         help='Input folder')
     
     parser.add_argument(
+        '--ext','-e',
+        type=str,
+        required=False,
+        help='File extension filter')
+    
+    parser.add_argument(
         '--outputcsv','-o',
         type=str,
         required=False,
@@ -54,7 +64,7 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    df = main(args.folder, actifact_dest_path=args.outputcsv)
+    df = main(args.folder, actifact_dest_path=args.outputcsv, extension_filter=args.ext)
     print(f"{len(df.index)} rows in total.")
     
     if args.outputcsv:
