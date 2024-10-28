@@ -4,15 +4,13 @@ import pandas as pd
 from source import lyrics_helpers
 import csv
 import argparse
-from ingest import ingest_file
+from ingest import ingest_file, artifact
 
 def main(filename : str):
-    # df = pd.read_csv(filename, index_col=0, quoting=csv.QUOTE_ALL)
-    csv_list = lyrics_helpers.read_csv_max_split(filepath=filename)
-    df = pd.DataFrame(csv_list[1:], columns=csv_list[0])
+    df = artifact.load(filename)
     assert len(df.index) > 0, f"rows empty in {filename}"
     print(f"{len(df.index)} rows in {filename}")
-    return df, csv_list
+    return df
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -61,10 +59,10 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    df, csv_list = main(args.inputfile)
+    df = main(args.inputfile)
     
     if args.outputcsv:
-        df.to_csv(args.outputcsv, index=False, quoting=csv.QUOTE_NONNUMERIC)
+        artifact.create(df, args.outputcsv)
     
     if args.sqlite:
         save_to_db(args.sqlite, df)

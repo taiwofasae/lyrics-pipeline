@@ -18,7 +18,7 @@ def create(artifact : pd.DataFrame, storage_path : str):
     return storage_path
 
 def load(storage_path : str, type = 'csv') -> pd.DataFrame:
-    
+    # df = pd.read_csv(storage_path, index_col=0, quoting=csv.QUOTE_ALL)    
     csv_list = lyrics_helpers.read_csv_max_split(filepath=storage_path)
     return pd.DataFrame(csv_list[1:], columns=csv_list[0])
 
@@ -29,4 +29,7 @@ def append(destination : str, artifact : pd.DataFrame):
     df = pd.concat([dest_df, artifact], ignore_index=True)
     
     return create(artifact=df, storage_path=destination)
+
+def append_to(dest_df : pd.DataFrame, artifact : pd.DataFrame):
+    return pd.concat([dest_df, artifact], ignore_index=True)
     

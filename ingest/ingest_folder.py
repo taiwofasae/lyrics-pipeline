@@ -21,13 +21,13 @@ def main(folder_path : str, actifact_dest_path : str = None, extension_filter = 
             continue
 
         try:
-            df, csv_list = ingest_file.main(local_path)
+            df = ingest_file.main(local_path)
         
             # append to artifact or create if not exist
             if total_df is None:
                 total_df = df
             else:
-                total_df = pd.concat([total_df, df], ignore_index=True)
+                total_df = artifact.append_to(total_df, df)
                 
             if actifact_dest_path:
                 artifact.create(total_df, actifact_dest_path)
@@ -50,6 +50,7 @@ if __name__ == '__main__':
         '--ext','-e',
         type=str,
         required=False,
+        default='',
         help='File extension filter')
     
     parser.add_argument(
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     print(f"{len(df.index)} rows in total.")
     
     if args.outputcsv:
-        df.to_csv(args.outputcsv, index=False, quoting=csv.QUOTE_NONNUMERIC)
+        artifact.create(df, args.outputcsv)
         
     if args.sqlite:
         ingest_file.save_to_db(args.sqlite, df)
