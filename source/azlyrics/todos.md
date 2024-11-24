@@ -1,6 +1,7 @@
 - Retrieve artist songs not stratified into albums. Beautifulsoup on 'listalbum-item' classes instead of 'listAlbum' id divs.
 - Script
   - scheduling for `download_songs 'artist list' line# 'folder'`
+    - pay attention to .sql and .sh files
     - manage start and stop
     - manage resources
   - scheduling for `download_lyrics artist folder artist# song# 'folder out'`

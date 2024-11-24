@@ -25,7 +25,7 @@ class COLUMNS:
   
 def read_csv_max_split(filepath):
   output = []
-  with open(filepath,"r", encoding='utf8') as file:
+  with open(filepath,"r", encoding='utf-8') as file:
     text = file.read()
   results = text.split('"\n"')
 

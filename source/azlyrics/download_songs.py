@@ -5,10 +5,54 @@ from requests.exceptions import TooManyRedirects
 import contextlib
 
 class DB:
-    def create_table_if_not_exist(db_con):
-        cur = db_con.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
-        db_con.commit()
+    
+    def create_table_if_not_exist(metadb):
+        with contextlib.closing(sqlite3.connect(metadb)) as db_con:
+            cur = db_con.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS songs (title, slug, artist, url, status, primary key (title, artist), foreign key (artist) references artists(slug));")
+            db_con.commit()
+            
+    def insert_song_into_db(metadb, artist, title, url, slug=None, db_con=None):
+        
+        if db_con: # use existing cursor
+            cursor = db_con.cursor()
+            url = url or ''
+            slug = slug or (url.split("/")[-1]).split('.html')[0]
+            
+            try:
+                cursor.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
+                if db_con:
+                    db_con.commit()
+
+            except Exception as e:
+                print(f"Could not insert song {title} into songs table of db.")
+                
+        else: # make new connection
+            with contextlib.closing(sqlite3.connect(metadb)) as db_con:
+                DB.insert_song_into_db(metadb, artist, title, url, db_con=db_con)
+            
+    def insert_songs_into_db(metadb, artist, songs):
+        with contextlib.closing(sqlite3.connect(metadb)) as db_con:
+            for title, url in songs:
+                DB.insert_song_into_db(metadb, artist, title, url, db_con=db_con)
+            
+            DB.update_artists_table_on_complete(db_con, artist)
+            
+    def insert_songs_into_db1(metadb, artist, songs):
+        with contextlib.closing(sqlite3.connect(metadb)) as db_con:
+            cur = db_con.cursor()
+            for title, url in songs:
+                url = url or ''
+                slug = url.split("/")[-1]
+                slug = slug.split('.html')[0]
+                try:
+                    cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
+                    db_con.commit()
+
+                except Exception as e:
+                    print(f"Could not insert song {title} into songs table of db.")
+            
+            DB.update_artists_table_on_complete(db_con, artist)
         
     def update_artists_table_on_complete(db_con, artist):
         cur = db_con.cursor()
@@ -40,20 +84,8 @@ def download(metadb, artist, filepath):
     songs = azlyrics.songs(artist=artist)['songs']
     assert len(songs) > 0, "songs list is empty"
     
-    with contextlib.closing(sqlite3.connect(metadb)) as db_con:
-        cur = db_con.cursor()
-        for title, url in songs:
-            url = url or ''
-            slug = url.split("/")[-1]
-            slug = slug.split('.html')[0]
-            try:
-                cur.execute("INSERT INTO songs (title, slug, artist, url, status) VALUES (?, ?, ?, ?, ?)", (title, slug, artist, url, 'pending'))
-                db_con.commit()
-
-            except Exception as e:
-                print(f"Could not insert song {title} into songs table of db.")
-        
-        DB.update_artists_table_on_complete(db_con, artist)
+    if metadb:
+        DB.insert_songs_into_db(metadb, artist, songs)
     
     
     with open(filepath, 'w') as f:
@@ -79,8 +111,8 @@ if __name__ == '__main__':
     
     args= parser.parse_args()
     
-    with contextlib.closing(sqlite3.connect(args.metadatadb)) as db_con:
-        DB.create_table_if_not_exist(db_con)
+    if args.metadatadb:
+        DB.create_table_if_not_exist(args.metadatadb)
     
     iteration = 0
     while iteration < args.tries:

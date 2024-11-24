@@ -23,7 +23,8 @@ def download(metadb, artist, song, filepath):
     with open(filepath, 'w') as f:
         f.write(lyrics)
     
-    update_songs_db(metadb, artist, song)
+    if metadb:
+        update_songs_db(metadb, artist, song)
     
     
 if __name__ == '__main__':

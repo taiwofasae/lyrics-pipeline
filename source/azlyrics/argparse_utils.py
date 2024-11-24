@@ -4,7 +4,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--metadatadb', '-m',
     type=str,
-    required=True,
+    required=False,
     help='Metadata sqlite file path')
 
 parser.add_argument(
