@@ -13,8 +13,9 @@ fi
 mkdir -p $4
 
 SKIP_A=$2-1
-SKIP_B=$3-1
+SKIP_B=$3
 while read -r artist_path; do
+	echo "artist_path: $artist_path"
 	artist_slug=$(echo "$artist_path" | sed -r 's/.*\/(.+).txt/\1/')
 	SKIP_A=$(( $SKIP_A + 1 ))
 	output_file="$4$artist_slug.csv"
@@ -24,7 +25,6 @@ while read -r artist_path; do
 	cat headers.txt  > $output_file
 	
 	while IFS='|' read -r song url; do
-		SKIP_B=$(( $SKIP_B + 1 ))
 		if [[ "$url" == 'None' ]]; then
 			echo "'None' url found in text. Skipping..."
 			continue
@@ -37,6 +37,8 @@ while read -r artist_path; do
 		cat "$temp_output_file" >> $output_file
 		echo "\"" >> $output_file
 	
-	done < <(tail -n "+$3" "$artist_path")
+		SKIP_B=$(( $SKIP_B + 1 ))
+	done < <(tail -n "+$SKIP_B" "$artist_path")
+	SKIP_B=0 #reset songs counter
 	rm "$temp_output_file"
 done < <(ls $1*txt | tail -n "+$2")
