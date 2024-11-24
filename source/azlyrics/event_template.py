@@ -52,7 +52,7 @@ if __name__ == '__main__':
         help='Song slug')
     
     parser.add_argument(
-        '--status',
+        '--completed',
         action='store_true',
         help='Download status')
     
@@ -63,6 +63,6 @@ if __name__ == '__main__':
                    title=args.title,
                    url=args.url,
                    song=args.song,
-                   status=args.status))
+                   status=args.completed))
     
     
