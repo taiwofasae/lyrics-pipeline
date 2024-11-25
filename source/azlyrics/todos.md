@@ -6,3 +6,5 @@
     - manage resources
   - scheduling for `download_lyrics artist folder artist# song# 'folder out'`
   - push to s3 storage
+  - Artist
+    - url fetch failing

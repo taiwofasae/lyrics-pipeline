@@ -21,19 +21,34 @@ def consume_events(metadb, topic, server, group_id=None):
             # get the JSON deserialized value
             value = msg.value
             
-            artist = value["artist"]
-            title = value["title"]
-            url = value["url"]
-            slug = value["slug"]
-            status = value["status"] if "status" in value else False
-            
-            download_songs.DB.insert_songs_into_db(metadb, artist=artist, 
-                                                   songs=(title, url),
-                                                   slug=slug)
-            
-            print(f"Successfully processed song by artist: '{artist}' titled: '{title}'")
-            
-            if status:
+            if "artist_file_path" in value:
+                # process artist file path instead
+                artist = value["artist"]
+                filepath = value["artist_file_path"]
+                
+                songs = download_songs.read_songs_from_file(filepath=filepath)
+                
+                # single DB connection
+                download_songs.DB.insert_songs_into_db(metadb=metadb, artist=artist, songs=songs)
+                
+                print(f"Successfully processed songs by artist: '{artist}")
+                
+            else:
+                # song event
+                artist = value["artist"]
+                slug = value["slug"]
+                title = value["title"] or slug
+                url = value["url"]
+                status = value["status"] if "status" in value else False
+                
+                # single DB connection
+                download_songs.DB.insert_songs_into_db(metadb, artist=artist, 
+                                                    songs=(title, url),
+                                                    slug=slug)
+                
+                print(f"Successfully processed song by artist: '{artist}' titled: '{title}'")
+                
+                # single DB connection
                 download_lyrics.update_songs_db(metadb, artist=artist, song=slug)
                 print(f"lyrics downloaded.")
 

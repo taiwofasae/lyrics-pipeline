@@ -72,6 +72,16 @@ def main(artist_slug : str):
     
     return songs['songs']
 
+def save_songs_to_file(filepath, songs):
+    with open(filepath, 'w') as f:
+        f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
+        
+def read_songs_from_file(filepath):
+    with open(filepath, 'r') as f:
+        lines = [line.split('|') for line in f]
+        
+    return lines
+
 def download(metadb, artist, filepath):
     
     # fetch pending artists
@@ -88,8 +98,7 @@ def download(metadb, artist, filepath):
         DB.insert_songs_into_db(metadb, artist, songs)
     
     
-    with open(filepath, 'w') as f:
-        f.write('\n'.join([f'{title}|{url}' for title,url in songs]))
+    save_songs_to_file(filepath=filepath, songs=songs)
         
     
     
