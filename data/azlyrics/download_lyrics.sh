@@ -33,6 +33,11 @@ while read -r artist_path; do
 		echo "artist#$SKIP_A: $artist_slug | song#$SKIP_B:  $slug : $url"
 		python ../../source/azlyrics/download_lyrics.py -m './meta.db' --artist "$artist_slug" --song "$slug" --filepath "$temp_output_file" -t 100 --tags "artist#$SKIP_A: $artist_slug | song#$SKIP_B : $slug : $url"
 
+		# if previous line succeeded
+		if [ $? -eq 0 ]; then
+			python ../../source/azlyrics/song_event_template.py --template "./song_template.json" --artist "$artist_slug" --url "$url" --title "" --song "$slug" --completed | ./kafka_publish.sh example
+		fi
+
 		echo "\"$artist_slug\",\"\",\"$song\",\"$url\",\"" >> $output_file
 		cat "$temp_output_file" >> $output_file
 		echo "\"" >> $output_file
